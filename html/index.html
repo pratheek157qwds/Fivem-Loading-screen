@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!-- ppr-dev loading screen -->
+<html>
+
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="script.js"></script>
+</head>
+
+<body>
+    <!-- background video -->
+    <video id="video" autoplay loop muted playsinline>
+        <source src="../assets/loading-video.mov" type="video/mp4">
+    </video>
+
+    <!-- cinema mode button -->
+    <div id="ui-toggle" class="ui-toggle">
+        <span class="material-icons">visibility</span>
+    </div>
+
+    <!-- main ui wrapper -->
+    <div id="ui-container">
+
+        <!-- server logo top left -->
+        <div class="info">
+            <img src="../assets/ssrp.webp" class="server-logo" alt="Server Logo">
+        </div>
+
+        <!-- welcome message center -->
+        <div class="welcome-container" id="welcome-container">
+            <div class="welcome-text">Welcome back,</div>
+            <div class="welcome-name" id="player-name">Player</div>
+        </div>
+
+        <!-- player count top right area -->
+        <div class="player-count-container" id="player-count-container">
+            <span class="material-icons player-count-icon">groups</span>
+            <span class="player-count-text" id="player-count-text">0/64 Online</span>
+        </div>
+
+        <!-- music player bottom left -->
+        <div class="music-container" id="music-container">
+            <div class="track-info">
+                <div class="song-title">Loading...</div>
+                <div class="artist-name">System</div>
+            </div>
+
+            <div class="controls-row">
+                <div class="volume-container">
+                    <span class="material-icons volume-icon">volume_up</span>
+                    <div class="volume-slider-wrapper">
+                        <input type="range" min="0" max="100" value="15" class="volume-slider" id="volume-slider">
+                    </div>
+                </div>
+
+                <div class="playback-controls">
+                    <div class="control-btn prev-btn">
+                        <span class="material-icons">skip_previous</span>
+                    </div>
+                    <div class="control-btn play-btn">
+                        <span class="material-icons">play_arrow</span>
+                    </div>
+                    <div class="control-btn next-btn">
+                        <span class="material-icons">skip_next</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- loading bar bottom right -->
+        <div class="loading-container">
+            <div class="loading-text-wrapper">
+                <span class="loading-text-2">The city is now loading...</span>
+                <span class="loading-percentage">0%</span>
+            </div>
+            <div class="loading-bar-bg">
+                <div class="loading-fill"></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
