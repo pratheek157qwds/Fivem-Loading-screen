@@ -1,0 +1,16 @@
+{
+    "ShowLogo": true,
+    "Logo": "assets/ssrp.webp",
+    "ServerName": "SSRP",
+    "Video": "assets/loading-video.mov",
+    "EnableMusic": true,
+    "Music": [
+        {
+            "title": "BAKA YONA",
+            "artist": "PPR",
+            "src": "assets/BAKA_YONA.mp3"
+        }
+    ],
+    "ShowWelcome": true,
+    "ShowPlayerCount": true
+}

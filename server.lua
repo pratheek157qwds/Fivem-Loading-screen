@@ -16,5 +16,7 @@ AddEventHandler('playerConnecting', function(name, setKickReason, deferrals)
         maxPlayers = maxPlayers
     })
 
+    -- wait one tick so handover payload is delivered before closing the deferral
+    Wait(0)
     deferrals.done()
 end)

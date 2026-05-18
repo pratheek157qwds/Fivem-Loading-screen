@@ -37,73 +37,35 @@ $(document).ready(function () {
         return path;
     }
 
-    // fetch config.lua and parse it
+    // fetch config.json and apply it (replaces old lua regex parser)
     function fetchConfig() {
+        // apply defaults immediately so ui doesnt sit blank
         applyConfig();
 
-        fetch('../config.lua')
+        fetch('config.json')
             .then(response => {
-                if (!response.ok) throw new Error("Config not found");
-                return response.text();
+                if (!response.ok) throw new Error("config.json not found");
+                return response.json();
             })
-            .then(text => {
-                parseLua(text);
+            .then(data => {
+                // merge json values into Config
+                Object.assign(Config, data);
                 applyConfig();
-                // update songs from config if there is any
+
+                // update songs from config and reload player
                 if (Config.Music && Config.Music.length > 0) {
                     songs = Config.Music;
                     currentSongIndex = 0;
-                    loadSong(0);
                 }
+
+                // init music after config is applied so correct songs load
+                initMusicPlayer();
             })
             .catch(err => {
-                console.error("Config load failed:", err);
+                console.error("Config load failed, using defaults:", err);
+                // still init music with fallback songs
+                initMusicPlayer();
             });
-
-        initMusicPlayer();
-    }
-
-    // simple lua parser for the config values
-    function parseLua(text) {
-        // parse boolean toggles
-        const showLogoMatch = text.match(/Config\.ShowLogo\s*=\s*(true|false)/);
-        if (showLogoMatch) Config.ShowLogo = showLogoMatch[1] === 'true';
-
-        const enableMusicMatch = text.match(/Config\.EnableMusic\s*=\s*(true|false)/);
-        if (enableMusicMatch) Config.EnableMusic = enableMusicMatch[1] === 'true';
-
-        const showWelcomeMatch = text.match(/Config\.ShowWelcome\s*=\s*(true|false)/);
-        if (showWelcomeMatch) Config.ShowWelcome = showWelcomeMatch[1] === 'true';
-
-        const showPlayerCountMatch = text.match(/Config\.ShowPlayerCount\s*=\s*(true|false)/);
-        if (showPlayerCountMatch) Config.ShowPlayerCount = showPlayerCountMatch[1] === 'true';
-
-        // get logo path
-        const logoMatch = text.match(/Config\.Logo\s*=\s*["'](.*?)["']/);
-        if (logoMatch) Config.Logo = logoMatch[1];
-
-        // get video path
-        const videoMatch = text.match(/Config\.Video\s*=\s*["'](.*?)["']/);
-        if (videoMatch) Config.Video = videoMatch[1];
-
-        // parse music table
-        const musicBlock = text.match(/Config\.Music\s*=\s*\{([\s\S]*?)\}/);
-        if (musicBlock) {
-            const cleanBlock = musicBlock[1].replace(/--.*/g, '');
-            const items = cleanBlock.match(/\{.*?\}/g);
-            if (items) {
-                songs = items.map(item => {
-                    const title = item.match(/title\s*=\s*["'](.*?)["']/);
-                    const artist = item.match(/artist\s*=\s*["'](.*?)["']/);
-                    const src = item.match(/src\s*=\s*["'](.*?)["']/);
-                    return {
-                        title: title ? title[1] : "Unknown",
-                        artist: artist ? artist[1] : "Unknown",
-                        src: src ? src[1] : ""
-                    };
-                });
-            }
-        }
     }
 
     // apply config to the page elements
@@ -202,6 +164,22 @@ $(document).ready(function () {
 
     // handle handover data from fivem server
     function handleHandover() {
+        // --- returning vs new player detection ---
+        const visitCount = parseInt(localStorage.getItem('visitCount') || '0');
+        const isReturning = visitCount > 0;
+        // save incremented count for next time
+        localStorage.setItem('visitCount', visitCount + 1);
+
+        // set welcome label based on visit history
+        if (Config.ShowWelcome) {
+            if (isReturning) {
+                $('#welcome-text').text('Welcome back,');
+            } else {
+                const serverName = Config.ServerName || 'the city';
+                $('#welcome-text').text('Welcome to ' + serverName + ',');
+            }
+        }
+
         // check if fivem give us handover data
         if (window.nuiHandoverData) {
             const data = window.nuiHandoverData;
@@ -287,6 +265,27 @@ $(document).ready(function () {
         // when song end play next one
         audio.removeEventListener('ended', nextSong);
         audio.addEventListener('ended', nextSong);
+
+        // update progress bar and elapsed time as song plays
+        audio.addEventListener('timeupdate', function () {
+            if (!audio.duration) return;
+            const pct = (audio.currentTime / audio.duration) * 100;
+            $('#music-progress-fill').css('width', pct + '%');
+            $('#time-elapsed').text(formatTime(audio.currentTime));
+        });
+
+        // set total duration when audio metadata is ready
+        audio.addEventListener('loadedmetadata', function () {
+            $('#time-total').text(formatTime(audio.duration));
+        });
+
+        // click on progress bar to seek to that position
+        $('#music-progress-bar').off('click').on('click', function (e) {
+            if (!audio.duration) return;
+            const rect = this.getBoundingClientRect();
+            const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            audio.currentTime = pct * audio.duration;
+        });
     }
 
     // load song by its index
@@ -337,6 +336,14 @@ $(document).ready(function () {
         volume = $(this).val() / 100;
         audio.volume = volume;
         localStorage.setItem('musicVolume', volume);
+    }
+
+    // format seconds into m:ss string
+    function formatTime(secs) {
+        if (isNaN(secs) || !isFinite(secs) || secs < 0) return '0:00';
+        const m = Math.floor(secs / 60);
+        const s = Math.floor(secs % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
     }
 
     // update the loading bar and text

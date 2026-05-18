@@ -224,6 +224,53 @@ body {
     color: #ccc;
 }
 
+/* music progress bar */
+.music-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 220px;
+    margin-bottom: 2px;
+}
+
+.time-elapsed,
+.time-total {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-dim);
+    min-width: 28px;
+    font-variant-numeric: tabular-nums;
+}
+
+.time-total {
+    text-align: right;
+}
+
+.music-progress-bar-bg {
+    flex: 1;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: height 0.2s ease;
+}
+
+.music-progress-bar-bg:hover {
+    height: 5px;
+}
+
+.music-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--primary-color);
+    border-radius: 2px;
+    box-shadow: 0 0 6px var(--primary-color);
+    transition: width 0.5s linear;
+    pointer-events: none;
+}
+
 .controls-row {
     display: flex;
     align-items: center;

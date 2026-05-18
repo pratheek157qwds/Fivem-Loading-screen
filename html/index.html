@@ -30,7 +30,7 @@
 
         <!-- welcome message center -->
         <div class="welcome-container" id="welcome-container">
-            <div class="welcome-text">Welcome back,</div>
+            <div class="welcome-text" id="welcome-text">Welcome back,</div>
             <div class="welcome-name" id="player-name">Player</div>
         </div>
 
@@ -45,6 +45,15 @@
             <div class="track-info">
                 <div class="song-title">Loading...</div>
                 <div class="artist-name">System</div>
+            </div>
+
+            <!-- music progress bar with elapsed / total time -->
+            <div class="music-progress-container">
+                <span class="time-elapsed" id="time-elapsed">0:00</span>
+                <div class="music-progress-bar-bg" id="music-progress-bar">
+                    <div class="music-progress-fill" id="music-progress-fill"></div>
+                </div>
+                <span class="time-total" id="time-total">0:00</span>
             </div>
 
             <div class="controls-row">
