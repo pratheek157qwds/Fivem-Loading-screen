@@ -238,6 +238,7 @@ $(document).ready(function () {
         }
         audio.volume = volume;
         if ($('#volume-slider').length) $('#volume-slider').val(volume * 100);
+        updateVolumeIcon(volume);
 
         // check if user had paused before
         const savedPaused = localStorage.getItem('musicPaused');
@@ -245,14 +246,17 @@ $(document).ready(function () {
         if (savedPaused === 'true') {
             isPlaying = false;
             $('.play-btn .material-icons').text('play_arrow');
+            $('#equalizer').removeClass('playing');
         } else {
             audio.play().then(() => {
                 isPlaying = true;
                 $('.play-btn .material-icons').text('pause');
+                $('#equalizer').addClass('playing');
             }).catch(e => {
                 console.log("Auto-play blocked:", e);
                 isPlaying = false;
                 $('.play-btn .material-icons').text('play_arrow');
+                $('#equalizer').removeClass('playing');
             });
         }
 
@@ -261,6 +265,7 @@ $(document).ready(function () {
         $('.prev-btn').off('click').on('click', prevSong);
         $('.next-btn').off('click').on('click', nextSong);
         $('#volume-slider').off('input').on('input', changeVolume);
+        $('.volume-icon').off('click').on('click', toggleMute);
 
         // when song end play next one
         audio.removeEventListener('ended', nextSong);
@@ -298,7 +303,12 @@ $(document).ready(function () {
         $('.artist-name').text(song.artist);
 
         if (isPlaying) {
-            audio.play().catch(e => console.log("Auto-play prevented:", e));
+            audio.play().then(() => {
+                $('#equalizer').addClass('playing');
+            }).catch(e => {
+                console.log("Auto-play prevented:", e);
+                $('#equalizer').removeClass('playing');
+            });
         }
     }
 
@@ -308,13 +318,22 @@ $(document).ready(function () {
         if (isPlaying) {
             audio.pause();
             $icon.text('play_arrow');
+            $('#equalizer').removeClass('playing');
             localStorage.setItem('musicPaused', 'true');
+            isPlaying = false;
         } else {
-            audio.play().catch(e => console.log("Play prevented:", e));
-            $icon.text('pause');
-            localStorage.setItem('musicPaused', 'false');
+            audio.play().then(() => {
+                $icon.text('pause');
+                $('#equalizer').addClass('playing');
+                localStorage.setItem('musicPaused', 'false');
+                isPlaying = true;
+            }).catch(e => {
+                console.log("Play prevented:", e);
+                $icon.text('play_arrow');
+                $('#equalizer').removeClass('playing');
+                isPlaying = false;
+            });
         }
-        isPlaying = !isPlaying;
     }
 
     // go to previous song
@@ -336,6 +355,40 @@ $(document).ready(function () {
         volume = $(this).val() / 100;
         audio.volume = volume;
         localStorage.setItem('musicVolume', volume);
+        updateVolumeIcon(volume);
+    }
+
+    let preMuteVolume = 0.15;
+    // toggle mute state
+    function toggleMute() {
+        const $slider = $('#volume-slider');
+        if (audio.volume > 0) {
+            preMuteVolume = audio.volume;
+            audio.volume = 0;
+            $slider.val(0);
+            updateVolumeIcon(0);
+            localStorage.setItem('musicVolume', 0);
+        } else {
+            const targetVol = preMuteVolume > 0 ? preMuteVolume : 0.15;
+            audio.volume = targetVol;
+            $slider.val(targetVol * 100);
+            updateVolumeIcon(targetVol);
+            localStorage.setItem('musicVolume', targetVol);
+        }
+    }
+
+    // update volume icon state based on volume level
+    function updateVolumeIcon(vol) {
+        const $icon = $('.volume-icon');
+        if (vol === 0) {
+            $icon.text('volume_off');
+        } else if (vol < 0.35) {
+            $icon.text('volume_mute');
+        } else if (vol < 0.7) {
+            $icon.text('volume_down');
+        } else {
+            $icon.text('volume_up');
+        }
     }
 
     // format seconds into m:ss string
@@ -367,18 +420,59 @@ $(document).ready(function () {
     }
 
     // cinema mode toggle for hiding ui
-    $('#ui-toggle').on('click', function () {
+    function toggleCinemaMode() {
         const $container = $('#ui-container');
-        const $icon = $(this).find('.material-icons');
+        const $toggleBtn = $('#ui-toggle');
+        const $icon = $toggleBtn.find('.material-icons');
 
         if ($container.hasClass('hidden')) {
             $container.removeClass('hidden');
             $icon.text('visibility');
-            $(this).css('opacity', '1');
+            $toggleBtn.css('opacity', '1');
         } else {
             $container.addClass('hidden');
             $icon.text('visibility_off');
-            $(this).css('opacity', '0.5');
+            $toggleBtn.css('opacity', '0.5');
+        }
+    }
+
+    // click handler for cinema mode
+    $('#ui-toggle').on('click', toggleCinemaMode);
+
+    // keydown listener for hotkeys
+    $(document).on('keydown', function (e) {
+        // Spacebar: Play/Pause music (only if music container is visible/enabled)
+        if (e.code === 'Space') {
+            e.preventDefault();
+            if (Config.EnableMusic && songs.length > 0) {
+                togglePlayPause();
+            }
+        }
+        // 'M': Mute/Unmute
+        else if (e.code === 'KeyM') {
+            e.preventDefault();
+            if (Config.EnableMusic && songs.length > 0) {
+                toggleMute();
+            }
+        }
+        // ArrowLeft: Previous track
+        else if (e.code === 'ArrowLeft') {
+            e.preventDefault();
+            if (Config.EnableMusic && songs.length > 1) {
+                prevSong();
+            }
+        }
+        // ArrowRight: Next track
+        else if (e.code === 'ArrowRight') {
+            e.preventDefault();
+            if (Config.EnableMusic && songs.length > 1) {
+                nextSong();
+            }
+        }
+        // 'C': Toggle Cinema mode
+        else if (e.code === 'KeyC') {
+            e.preventDefault();
+            toggleCinemaMode();
         }
     });
 

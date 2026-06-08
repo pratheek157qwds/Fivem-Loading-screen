@@ -17,11 +17,18 @@ A modern, highly customizable loading screen for FiveM servers featuring a sleek
 - **👥 Live Player Count**: Displays the current online players (e.g. `12/64 Online`) using native FiveM deferrals handover data.
 - **🎵 Advanced Music Player**:
   - Interactive playlist supporting multiple custom MP3 tracks.
-  - Controls: Play/Pause, Next Track, Previous Track.
+  - **📊 CSS Audio Equalizer**: A sleek 5-bar visualizer that pulses actively when music is playing and stays flat when paused.
+  - Controls: Play/Pause, Next Track, Previous Track. Clicking the volume icon also toggles mute.
   - Interactive Progress Bar: Shows time elapsed, total duration, and allows clicking/dragging on the progress bar to seek.
   - Volume Slider: Smooth volume controls.
   - State Persistence: Remembers the player's volume and playback preferences (saves to browser `localStorage` for future logins).
 - **⏳ Progressive Loading Bar**: A glowing neon-blue progress bar displaying realistic initialization stages (`0%` to `100%`) alongside status text like *Initializing game...*, *Loading world data...*, etc.
+- **⌨️ Keyboard Shortcuts**: Fully interactive keyboard binds allow players to control their experience without using a mouse:
+  - `Spacebar` - Play/Pause music
+  - `M` - Mute/Unmute audio
+  - `Arrow Left` - Previous track
+  - `Arrow Right` - Next track
+  - `C` - Toggle Cinema Mode (hide/show UI)
 
 ---
 
