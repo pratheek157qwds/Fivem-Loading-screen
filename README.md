@@ -103,7 +103,7 @@ You can test the UI and logic locally inside a normal web browser.
 ## 📝 Credits
 
 - **Author**: `ppr-dev`
-- **Design & Coding**: [Pratheek Scripts](https://github.com/)
+- **Design & Coding**: [Pratheek Scripts](https://github.com/pratheek157qwds)
 
 ---
 Enjoy the loading screen! If you encounter any issues or have suggestions, feel free to open a pull request or submit an issue.
